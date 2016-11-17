@@ -34,8 +34,13 @@ RefsURL<-"https://paleobiodb.org/data1.2/taxa/refs.csv?select=taxonomy&private&a
 GotURL<-getURL(RefsURL)
 PBDBRefs<-read.csv(text=GotURL,header=TRUE)
 
-# download all article data form geodeepdive with a pubname that contains the word "palaeogeography"
-DDRefs<-fromJSON("https://geodeepdive.org/api/articles?pubname_like=palaeogeography")
+# Find the current directory
+CurrentDirectory<-getwd()
+
+# Move othe input folder
+setwd(paste(CurrentDirectory,"/input",sep=""))
+# Load in the input.bibjson file
+DDRefs<-fromJSON("input.bibjson")
 DDRefs<-DDRefs[[1]][[2]]
 
 # make a column of DD reference numbers
@@ -86,7 +91,6 @@ colnames(DDRefs)[2]<-"author"
 colnames(DDRefs)[3]<-"pubyr"
 colnames(DDRefs)[4]<-"title"
 colnames(DDRefs)[5]<-"pubtitle"
-
  
 PBDBRefs[,"reference_no"]<-as.numeric(as.character(PBDBRefs[,"reference_no"]))
 PBDBRefs[,"author1last"]<-as.character(PBDBRefs[,"author1last"])
@@ -100,9 +104,8 @@ colnames(PBDBRefs)[3]<-"pubyr"
 colnames(PBDBRefs)[4]<-"title"
 colnames(PBDBRefs)[5]<-"pubtitle"
 
-
-
 ### Phase 2: A MATCHING FUNCTION IS BORN
+# A function for matching PBDB and DDRefs
 matchBibs<-function(Bib1,Bib2) {
     # Title Similarity
     Title<-stringsim(Bib1["title"],Bib2["title"])
@@ -118,20 +121,33 @@ matchBibs<-function(Bib1,Bib2) {
     return(setNames(c(DocID,Title,Year,Journal,Author),c("DocID","Title","Year","Journal","Author")))
     }
 
+# A macro function for matching PBDB and DDRefs
 macroBibs<-function(PBDBRefs,DDRefs) {    
     TemporaryMatches<-as.data.frame(t(apply(DDRefs,1,matchBibs,PBDBRefs)))
     return(TemporaryMatches[which.max(TemporaryMatches[,"Title"]),])
     }
 
-# Establish a cluster for doParallel
-# Make Core Cluster 
-Cluster<-makeCluster(3)
 # Pass the functions to the cluster
 clusterExport(cl=Cluster,varlist=c("matchBibs","stringsim","macroBibs"))
 MatchReferences<-parApply(Cluster, PBDBRefs, 1, macroBibs, DDRefs)
+# Stop the cluster
+stopCluster(Cluster)
 
 # Convert PBDBReferences into a data frame
 MatchRefs<-do.call(rbind,MatchReferences)
 
 # Assign PBDB reference numbers as names to MatchReferencesList
 rownames(MatchRefs)<-PBDBRefs[,"reference_no"]
+
+# Print status
+print(paste("Writing Outputs",Sys.time()))
+    
+# Write the Outputs
+setwd(paste(CurrentDirectory,"/output",sep=""))
+
+# Write the output
+saveRDS(MatchRefs, "MatchRefs")
+write.csv(UnitHitData, "UnitHitData.csv")
+
+# Print the completion  
+print(paste("Complete",Sys.time()))
