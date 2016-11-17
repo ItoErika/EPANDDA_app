@@ -146,8 +146,8 @@ print(paste("Writing Outputs",Sys.time()))
 setwd(paste(CurrentDirectory,"/output",sep=""))
 
 # Write the output
-saveRDS(MatchRefs, "MatchRefs")
-write.csv(UnitHitData, "UnitHitData.csv")
+saveRDS(MatchRefs, "MatchRefs.rds")
+write.csv(MatchRefs, "MatchRefs.csv")
 
 # Print the completion  
 print(paste("Complete",Sys.time()))
