@@ -41,32 +41,32 @@ CurrentDirectory<-getwd()
 setwd(paste(CurrentDirectory,"/input",sep=""))
 # Load in the input.bibjson file
 DDRefs<-fromJSON("input.bibjson")
-DDRefs<-DDRefs[[1]][[2]]
+DDRefs<-DDRefs[[1]]
 
 # make a column of DD reference numbers
 DDRefNums<-vector(length=length(DDRefs))
 for (i in 1:length(DDRefs)){
-    DDRefNums[i]<-DDRefs[[i]][[2]]
+    DDRefNums[i]<-DDRefs[[i]][["_gddid"]]
     }     
 # make a vector of DD authors
 DDAuthors<-vector(length=length(DDRefs))
 for (i in 1:length(DDRefs)){
-    DDAuthors[i]<-paste(unlist(DDRefs[[i]][[9]]), collapse=" ")
+    DDAuthors[i]<-paste(unlist(DDRefs[[i]][["author"]]), collapse=" ")
     }
 # make a vector of DD publication years
 DDPubYr<-vector(length=length(DDRefs))
 for (i in 1:length(DDRefs)){
-    DDPubYr[i]<-DDRefs[[i]][[13]]
+    DDPubYr[i]<-DDRefs[[i]][["year"]]
     } 
 # make a vector of DD ref titles 
 DDTitles<-vector(length=length(DDRefs))
 for (i in 1:length(DDRefs)){
-    DDTitles[i]<-DDRefs[[i]][[4]]
+    DDTitles[i]<-DDRefs[[i]][["title"]]
     }   
 # make a column of DD jornalnames 
 DDJournals<-vector(length=length(DDRefs))
 for (i in 1:length(DDRefs)){
-    DDJournals[i]<-DDRefs[[i]][[6]]
+    DDJournals[i]<-DDRefs[[i]][["journal"]]
     }   
 
 # create identically formatted matrices for geodeepdive and pbdb references 
