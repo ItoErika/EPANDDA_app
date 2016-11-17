@@ -28,4 +28,4 @@ dictionaries: PBDB
 # A list of terms used to subset the corpus
 
 # should the list of terms be case-sensitive?
-case-sensitive: true
+case-sensitive: false
