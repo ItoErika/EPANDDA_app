@@ -23,7 +23,7 @@ if (require("doParallel",warn.conflicts=FALSE)==FALSE) {
 
 # Start a cluster for multicore, 4 by default or higher if passed as command line argument
 CommandArgument<-commandArgs(TRUE)
-if (is.na(CommandArgument)) {
+if (length(CommandArgument)==0) {
     Cluster<-makeCluster(4)
     } else {
     Cluster<-makeCluster(as.numeric(CommandArgument[1]))
@@ -41,33 +41,17 @@ CurrentDirectory<-getwd()
 setwd(paste(CurrentDirectory,"/input",sep=""))
 # Load in the input.bibjson file
 DDRefs<-fromJSON("input.bibjson")
-DDRefs<-DDRefs[[1]]
 
-# make a column of DD reference numbers
-DDRefNums<-vector(length=length(DDRefs))
-for (i in 1:length(DDRefs)){
-    DDRefNums[i]<-DDRefs[[i]][["_gddid"]]
-    }     
+# make a column of DD reference number
+DDRefNums<-parSapply(Cluster,DDRefs,function(x) x[["_gddid"]])
 # make a vector of DD authors
-DDAuthors<-vector(length=length(DDRefs))
-for (i in 1:length(DDRefs)){
-    DDAuthors[i]<-paste(unlist(DDRefs[[i]][["author"]]), collapse=" ")
-    }
+DDAuthors<-parSapply(Cluster,DDRefs,function(x) paste(unlist(x[["author"]]),collapse=" "))
 # make a vector of DD publication years
-DDPubYr<-vector(length=length(DDRefs))
-for (i in 1:length(DDRefs)){
-    DDPubYr[i]<-DDRefs[[i]][["year"]]
-    } 
+DDPubYr<-parSapply(Cluster,DDRefs,function(x) x[["year"]])
 # make a vector of DD ref titles 
-DDTitles<-vector(length=length(DDRefs))
-for (i in 1:length(DDRefs)){
-    DDTitles[i]<-DDRefs[[i]][["title"]]
-    }   
+DDTitles<-parSapply(Cluster,DDRefs,function(x) x[["title"]])
 # make a column of DD jornalnames 
-DDJournals<-vector(length=length(DDRefs))
-for (i in 1:length(DDRefs)){
-    DDJournals[i]<-DDRefs[[i]][["journal"]]
-    }   
+DDJournals<-parSapply(Cluster,DDRefs,function(x) x[["journal"]])
 
 # create identically formatted matrices for geodeepdive and pbdb references 
 DDRefs<-cbind(DDRefNums,DDAuthors,DDPubYr,DDTitles,DDJournals)
