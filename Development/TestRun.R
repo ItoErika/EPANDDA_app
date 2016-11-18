@@ -57,7 +57,10 @@ PBDBRefs<-PBDBRefs[1:100,]
 ### Phase 2: A MATCHING FUNCTION IS BORN
     
 print(paste("perform title matches",Sys.time()))   
-    
+
+# Find the stringsim for titles
+Title<-sapply(PBDBRefs[,"pbdb_title"],function(x,y) which.max(stringsim(x,y)),DDRefs[,"gdd_title"])
+ 
 # A function for matching PBDB and DDRefs
 matchTitles<-function(Bib1,Bib2) {
     # Title Similarity
