@@ -129,6 +129,8 @@ matchAdditional<-function(InitialMatches) {
 # export matchAdditional to the cluster
 clusterExport(cl=Cluster,varlist=c("matchAdditional"))                           
 MatchReferences<-parApply(Cluster, InitialMatches, 1, matchAdditional)
+# Stop the Cluser
+stopCluster(Cluster)
 # Reformat MatchReferences
 MatchReferences<-as.data.frame(t(MatchReferences))
 
