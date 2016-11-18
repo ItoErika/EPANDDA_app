@@ -49,94 +49,93 @@ DDRefs<-fromJSON("input.bibjson")
 print(paste("make DDRefs columns",Sys.time()))
 
 # make a column of DD reference number
-DDRefNums<-parSapply(Cluster,DDRefs,function(x) x[["_gddid"]])
+gdd_id<-parSapply(Cluster,DDRefs,function(x) x[["_gddid"]])
 # make a vector of DD authors
-DDAuthors<-parSapply(Cluster,DDRefs,function(x) paste(unlist(x[["author"]]),collapse=" "))
+gdd_author<-parSapply(Cluster,DDRefs,function(x) paste(unlist(x[["author"]]),collapse=" "))
 # make a vector of DD publication years
-DDPubYr<-parSapply(Cluster,DDRefs,function(x) x[["year"]])
+gdd_year<-parSapply(Cluster,DDRefs,function(x) x[["year"]])
 # make a vector of DD ref titles 
-DDTitles<-parSapply(Cluster,DDRefs,function(x) x[["title"]])
+gdd_title<-parSapply(Cluster,DDRefs,function(x) x[["title"]])
 # make a column of DD jornalnames 
-DDJournals<-parSapply(Cluster,DDRefs,function(x) x[["journal"]])
-    
-    
-print(paste("reformat PBDBRefs and DDRefs",Sys.time()))
-
+gdd_pubtitle<-parSapply(Cluster,DDRefs,function(x) x[["journal"]])
+  
 # create identically formatted matrices for geodeepdive and pbdb references 
-DDRefs<-cbind(DDRefNums,DDAuthors,DDPubYr,DDTitles,DDJournals)
-PBDBRefs<-cbind(PBDBRefs[c("reference_no","author1last","pubyr","reftitle","pubtitle")])  
+DDRefs<-cbind(gdd_id,gdd_author,gdd_year,gdd_title,gdd_pubtitle)
+PBDBRefs<-cbind(PBDBRefs[c("reference_no","author1last","pubyr","reftitle","pubtitle")])
+colnames(PBDBRefs)<-c("pbdb_no","pbdb_author","pbdb_year","pbdb_title","pbdb_pubtitle")
 
 # convert matrices to dataframes
 DDRefs<-as.data.frame(DDRefs)
 PBDBRefs<-as.data.frame(PBDBRefs)
 
-# make sure all of the data in the data frames are formatted correctly
-DDRefs[,"DDRefNums"]<-as.character(DDRefs[,"DDRefNums"])
-DDRefs[,"DDAuthors"]<-as.character(DDRefs[,"DDAuthors"])
-DDRefs[,"DDPubYr"]<-as.numeric(as.character(DDRefs[,"DDPubYr"]))
-DDRefs[,"DDTitles"]<-as.character(DDRefs[,"DDTitles"])
-DDRefs[,"DDJournals"]<-as.character(DDRefs[,"DDJournals"])
-
-DDRefs[,"author"]<-DDRefs[,"DDAuthors"]
-
-colnames(DDRefs)[1]<-"reference_no"
-colnames(DDRefs)[2]<-"author"
-colnames(DDRefs)[3]<-"pubyr"
-colnames(DDRefs)[4]<-"title"
-colnames(DDRefs)[5]<-"pubtitle"
- 
-PBDBRefs[,"reference_no"]<-as.numeric(as.character(PBDBRefs[,"reference_no"]))
-PBDBRefs[,"author1last"]<-as.character(PBDBRefs[,"author1last"])
-PBDBRefs[,"pubyr"]<-as.numeric(as.character(PBDBRefs[,"pubyr"]))
-PBDBRefs[,"reftitle"]<-as.character(PBDBRefs[,"reftitle"])
-PBDBRefs[,"pubtitle"]<-as.character(PBDBRefs[,"pubtitle"])
-
-colnames(PBDBRefs)[1]<-"reference_no"
-colnames(PBDBRefs)[2]<-"author"
-colnames(PBDBRefs)[3]<-"pubyr"
-colnames(PBDBRefs)[4]<-"title"
-colnames(PBDBRefs)[5]<-"pubtitle"
+# Change data types of DDRefs to appropriate types
+DDRefs[,"gdd_id"]<-as.character(DDRefs[,"gdd_id"])
+DDRefs[,"gdd_author"]<-as.character(DDRefs[,"gdd_author"])
+DDRefs[,"gdd_year"]<-as.numeric(as.character(DDRefs[,"gdd_year"]))
+DDRefs[,"gdd_title"]<-as.character(DDRefs[,"gdd_title"])
+DDRefs[,"gdd_pubtitle"]<-as.character(DDRefs[,"gdd_pubtitle"])
+# Change data types of PBDBRefs to appropriate types
+PBDBRefs[,"pbdb_no"]<-as.numeric(as.character(PBDBRefs[,"pbdb_no"]))
+PBDBRefs[,"pbdb_author"]<-as.character(PBDBRefs[,"pbdb_author"])
+PBDBRefs[,"pbdb_year"]<-as.numeric(as.character(PBDBRefs[,"pbdb_year"]))
+PBDBRefs[,"pbdb_title"]<-as.character(PBDBRefs[,"pbdb_title"])
+PBDBRefs[,"pbdb_pubtitle"]<-as.character(PBDBRefs[,"pbdb_pubtitle"])
 
 ### Phase 2: A MATCHING FUNCTION IS BORN
+matchTitle<-function(x,y) {
+    Similarity<-stringsim(x,y)
+    max_title<-max(Similarity)
+    max_no<-which.max(Similarity)
+    return(c(max_no,max_title))
+    }
     
-print(paste("perform matches",Sys.time()))
+# Status update
+print(paste("perform title matches",Sys.time()))   
+    
+# Find the best title stringsim for each PBDB ref in GDD
+clusterExport(cl=Cluster,varlist=c("matchTitle","stringsim"))
+TitleSimilarity<-parSapply(Cluster,PBDBRefs[,"pbdb_title"],matchTitle,DDRefs[,"gdd_title"])
+# Reshape the Title Similarity Output
+TitleSimilarity<-as.data.frame(t(unname(TitleSimilarity)))
+    
+# Bind Title Similarity with pbdb_no
+InitialMatches<-cbind(PBDBRefs[,"pbdb_no"],TitleSimilarity)
+InitialMatches[,"V1"]<-DDRefs[InitialMatches[,"V1"],"gdd_id"]
+colnames(InitialMatches)<-c("pbdb_no","gdd_id","title_sim")
+
+# Merge initial matches, pbdb refs, and gdd refs
+InitialMatches<-merge(InitialMatches,DDRefs,by="gdd_id",all.x=TRUE)
+InitialMatches<-merge(InitialMatches,PBDBRefs,by="pbdb_no",all.x=TRUE)
+    
+# Status update
+print(paste("finish title matches",Sys.time()))
+
+### Phase 3: Matching additional similarity information
+print(paste("perform additional matches",Sys.time()))
     
 # A function for matching PBDB and DDRefs
-matchBibs<-function(Bib1,Bib2) {
-    # Title Similarity
-    Title<-stringsim(Bib1["title"],Bib2["title"])
+matchAdditional<-function(InitialMatches) {
     # Pub year match
-    Year<-Bib1["pubyr"]==Bib2["pubyr"]
+    Year<-InitialMatches["pbdb_year"]==InitialMatches["gdd_year"]
     # Journal Similarity
-    Journal<-stringsim(Bib1["pubtitle"],Bib2["pubtitle"])
+    Journal<-stringsim(InitialMatches["pbdb_pubtitle"],InitialMatches["gdd_pubtitle"])
     # Author present
-    Author<-grepl(Bib2["author"],Bib1["author"],perl=TRUE,ignore.case=TRUE)
-    # Add docid column 
-    DocID<-as.character(Bib1["reference_no"])
+    Author<-grepl(InitialMatches["pbdb_author"],InitialMatches["gdd_author"],perl=TRUE,ignore.case=TRUE)
     # Return output     
-    return(setNames(c(DocID,Title,Year,Journal,Author),c("DocID","Title","Year","Journal","Author")))
+    FinalOutput<-setNames(c(InitialMatches["pbdb_no"],InitialMatches["gdd_id"],InitialMatches["title_sim"],Author,Year,Journal),c("pbdb_no","gdd_id","title_sim","author_in","year_match","pubtitle_sim"))
+    return(FinalOutput)
     }
 
-# A macro function for matching PBDB and DDRefs
-macroBibs<-function(PBDBRefs,DDRefs) {    
-    TemporaryMatches<-as.data.frame(t(apply(DDRefs,1,matchBibs,PBDBRefs)))
-    return(TemporaryMatches[which.max(TemporaryMatches[,"Title"]),])
-    }
+# export matchAdditional to the cluster
+clusterExport(cl=Cluster,varlist=c("matchAdditional"))                           
+MatchReferences<-parApply(Cluster, InitialMatches, 1, matchAdditional)
+# Reformat MatchReferences
+MatchReferences<-as.data.frame(t(MatchReferences))
 
-# Pass the functions to the cluster
-clusterExport(cl=Cluster,varlist=c("matchBibs","stringsim","macroBibs"))
-MatchReferences<-parApply(Cluster, PBDBRefs, 1, macroBibs, DDRefs)
-# Stop the cluster
-stopCluster(Cluster)
-    
+# Status Update    
 print(paste("finish matches",Sys.time()))
 
-# Convert PBDBReferences into a data frame
-MatchRefs<-do.call(rbind,MatchReferences)
-
-# Assign PBDB reference numbers as names to MatchReferencesList
-rownames(MatchRefs)<-PBDBRefs[,"reference_no"]
-
+                            
 # Print status
 print(paste("Writing Outputs",Sys.time()))
     
@@ -147,5 +146,5 @@ setwd(paste(CurrentDirectory,"/output",sep=""))
 saveRDS(MatchRefs, "MatchRefs.rds")
 write.csv(MatchRefs, "MatchRefs.csv")
 
-# Print the completion  
+# Print the completion notice
 print(paste("Complete",Sys.time()))
