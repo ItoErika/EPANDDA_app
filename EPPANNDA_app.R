@@ -29,6 +29,8 @@ if (length(CommandArgument)==0) {
     Cluster<-makeCluster(as.numeric(CommandArgument[1]))
     }
 
+print(paste("download PBDB refs",Sys.time()))
+
 # download all references from PBDB
 RefsURL<-"https://paleobiodb.org/data1.2/taxa/refs.csv?select=taxonomy&private&all_records"
 GotURL<-getURL(RefsURL)
@@ -37,10 +39,14 @@ PBDBRefs<-read.csv(text=GotURL,header=TRUE)
 # Find the current directory
 CurrentDirectory<-getwd()
 
+print(paste("download DD refs",Sys.time()))
+
 # Move othe input folder
 setwd(paste(CurrentDirectory,"/input",sep=""))
 # Load in the input.bibjson file
 DDRefs<-fromJSON("input.bibjson")
+
+print(paste("make DDRefs columns",Sys.time()))
 
 # make a column of DD reference number
 DDRefNums<-parSapply(Cluster,DDRefs,function(x) x[["_gddid"]])
@@ -52,6 +58,9 @@ DDPubYr<-parSapply(Cluster,DDRefs,function(x) x[["year"]])
 DDTitles<-parSapply(Cluster,DDRefs,function(x) x[["title"]])
 # make a column of DD jornalnames 
 DDJournals<-parSapply(Cluster,DDRefs,function(x) x[["journal"]])
+    
+    
+print(paste("reformat PBDBRefs and DDRefs",Sys.time()))
 
 # create identically formatted matrices for geodeepdive and pbdb references 
 DDRefs<-cbind(DDRefNums,DDAuthors,DDPubYr,DDTitles,DDJournals)
@@ -89,6 +98,9 @@ colnames(PBDBRefs)[4]<-"title"
 colnames(PBDBRefs)[5]<-"pubtitle"
 
 ### Phase 2: A MATCHING FUNCTION IS BORN
+    
+print(paste("perform matches",Sys.time()))
+    
 # A function for matching PBDB and DDRefs
 matchBibs<-function(Bib1,Bib2) {
     # Title Similarity
@@ -116,6 +128,8 @@ clusterExport(cl=Cluster,varlist=c("matchBibs","stringsim","macroBibs"))
 MatchReferences<-parApply(Cluster, PBDBRefs, 1, macroBibs, DDRefs)
 # Stop the cluster
 stopCluster(Cluster)
+    
+print(paste("finish matches",Sys.time()))
 
 # Convert PBDBReferences into a data frame
 MatchRefs<-do.call(rbind,MatchReferences)
