@@ -21,6 +21,11 @@ if (require("doParallel",warn.conflicts=FALSE)==FALSE) {
     library("doParallel");
     }
 
+if (require("plyr",warn.conflicts=FALSE)==FALSE) {
+    install.packages("plyr",repos="http://cran.cnr.berkeley.edu/");
+    library("plyr");
+    }
+
 # Start a cluster for multicore, 4 by default or higher if passed as command line argument
 CommandArgument<-commandArgs(TRUE)
 if (length(CommandArgument)==0) {
@@ -48,15 +53,15 @@ DDRefs<-fromJSON("input.bibjson")
 
 print(paste("make DDRefs columns",Sys.time()))
 
-# make a column of DD reference number
+print(paste("make a column of DD reference number",Sys.time()))
 gdd_id<-parSapply(Cluster,DDRefs,function(x) x[["_gddid"]])
-# make a vector of DD authors
+print(paste("make a vector of DD authors",Sys.time()))
 gdd_author<-parSapply(Cluster,DDRefs,function(x) paste(unlist(x[["author"]]),collapse=" "))
-# make a vector of DD publication years
+print(paste("make a vector of DD publication years",Sys.time()))
 gdd_year<-parSapply(Cluster,DDRefs,function(x) x[["year"]])
-# make a vector of DD ref titles 
+print(paste("make a vector of DD ref titles",Sys.time()))
 gdd_title<-parSapply(Cluster,DDRefs,function(x) x[["title"]])
-# make a column of DD jornalnames 
+print(paste("make a column of DD journal names",Sys.time())) 
 gdd_pubtitle<-parSapply(Cluster,DDRefs,function(x) x[["journal"]])
   
 # create identically formatted matrices for geodeepdive and pbdb references 
@@ -80,6 +85,12 @@ PBDBRefs[,"pbdb_author"]<-as.character(PBDBRefs[,"pbdb_author"])
 PBDBRefs[,"pbdb_year"]<-as.numeric(as.character(PBDBRefs[,"pbdb_year"]))
 PBDBRefs[,"pbdb_title"]<-as.character(PBDBRefs[,"pbdb_title"])
 PBDBRefs[,"pbdb_pubtitle"]<-as.character(PBDBRefs[,"pbdb_pubtitle"])
+    
+# RECORD STATS 
+# Record the initial number of PBDB documents
+PBDBDocs<-dim(PBDBRefs)[1]
+# Record the initial number of GeoDeepDive documents
+DDDocs<-dim(DDRefs)[1]
 
 ### Phase 2: A MATCHING FUNCTION IS BORN
 matchTitle<-function(x,y) {
@@ -133,7 +144,24 @@ MatchReferences<-parApply(Cluster, InitialMatches, 1, matchAdditional)
 stopCluster(Cluster)
 # Reformat MatchReferences
 MatchReferences<-as.data.frame(t(MatchReferences))
+  
+    
+print(paste("organize stats",Sys.time()))    
+# RECORD STATS
+# Create a vector of the title_sim column of MatchReferences
+TitleSim<-as.numeric(as.character(MatchReferences[,"title_sim"]))
+# Create a table showing title_sim values rounded to the nearest hundredth    
+TitleSimTable<-table(round_any(TitleSim,0.1,floor))
+RoundedTitleSim<-paste(names(TitleSimTable), collapse=" ")
+Refs<-paste(TitleSimTable, collapse=" ")
 
+# Create stat descriptions
+Descriptions<-c("Initial number of PBDBRefs","Initial number of DDRefs","Rounded title similarities","Number of references")
+# Bind stats
+Stats<-rbind(PBDBDocs,DDDocs,RoundedTitleSim,Refs)
+Stats<-as.data.frame(cbind(Stats,Descriptions),row.names=FALSE)
+colnames(Stats)<-c("Stats","Descriptions")  
+    
 # Status Update    
 print(paste("finish matches",Sys.time()))
                            
@@ -146,6 +174,7 @@ setwd(paste(CurrentDirectory,"/output",sep=""))
 # Write the output
 saveRDS(MatchRefs, "MatchRefs.rds")
 write.csv(MatchRefs, "MatchRefs.csv")
+write.csv(Stats,"Stats.csv",row.names=FALSE)
 
 # Print the completion notice
 print(paste("Complete",Sys.time()))
