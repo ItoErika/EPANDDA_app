@@ -173,6 +173,8 @@ setwd(paste(CurrentDirectory,"/output",sep=""))
 
 # Write the output
 saveRDS(MatchRefs, "MatchRefs.rds")
+saveRDS(DDRefs, "DDRefs.rds")
+saveRDS(PBDBRefs, "PBDBRefs.rds")
 write.csv(MatchRefs, "MatchRefs.csv")
 write.csv(Stats,"Stats.csv",row.names=FALSE)
 
