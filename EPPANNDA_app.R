@@ -175,7 +175,7 @@ setwd(paste(CurrentDirectory,"/output",sep=""))
 saveRDS(MatchReferences, "MatchReferences.rds")
 saveRDS(DDRefs, "DDRefs.rds")
 saveRDS(PBDBRefs, "PBDBRefs.rds")
-write.csv(MatchRefs, "MatchRefs.csv")
+write.csv(MatchReferences, "MatchRefs.csv")
 write.csv(Stats,"Stats.csv",row.names=FALSE)
 
 # Print the completion notice
