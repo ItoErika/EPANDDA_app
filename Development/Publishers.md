@@ -9,5 +9,5 @@ US Geological Survey Professional Paper | Professional Paper
 Geological Survey Professional Paper | Professional Paper
 Canadian Journal of Earth Science | Canadian Journal of Earth Sciences
 Géobios | Geobios
-Geobios Mémoire Spécial | Geibios
+Geobios Mémoire Spécial | Geobios
 U.S.G.S. Open File Report | Open-File Report
