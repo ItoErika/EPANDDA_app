@@ -21,8 +21,14 @@ Panda<-dbConnect(Driver, dbname = "PANDA", host = "localhost", port = 5432, user
 # Upload the raw data from postgres
 MatchReferences<-dbGetQuery(Panda, "SELECT * FROM panda_12052016.match_references;")
 
-# Select the perfect matches
-Perfect<-subset(MatchReferences,MatchReferences[,"title_sim"]==1 & MatchReferences[,"author_in"]==TRUE & MatchReferences[,"year_match"]==TRUE & MatchReferences[,"pubtitle_sim"]==1)
-# Select the imperfect matches
-Imperfect<-subset(MatchReferences,MatchReferences[,"pbdb_no"]%in%Perfect[,"pbdb_no"]!=TRUE)
+# Upload the learning set
+LearningSet<-dbGetQuery(Panda, "SELECT * FROM panda_12052016.learning_set;")
 
+# Check the plausible regression models
+Model1<-glm(Match~title_sim,family="binomial",data=LearningSet)
+Model2<-glm(Match~title_sim+author_in,family="binomial",data=LearningSet)
+Model3<-glm(Match~title_sim+author_in+year_match,family="binomial",data=LearningSet)
+Model4<-glm(Match~title_sim+author_in+year_match+pubtitle_sim,family="binomial",data=LearningSet)
+
+# Make predictions from the basic set
+Probabilities<-round(predict(Model4,MatchReferences,type="response"),4)
