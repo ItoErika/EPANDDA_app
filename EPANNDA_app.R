@@ -156,9 +156,11 @@ RoundedTitleSim<-paste(names(TitleSimTable), collapse=" ")
 Refs<-paste(TitleSimTable, collapse=" ")
 
 # Create stat descriptions
-Descriptions<-c("Initial number of PBDBRefs","Initial number of DDRefs","Rounded title similarities","Number of references")
+Descriptions<-c("Date","Initial number of PBDBRefs","Initial number of DDRefs","Rounded title similarities","Number of references")
+# Create date and time record for stats file
+Date<-Sys.time()
 # Bind stats
-Stats<-rbind(PBDBDocs,DDDocs,RoundedTitleSim,Refs)
+Stats<-rbind(Date,PBDBDocs,DDDocs,RoundedTitleSim,Refs)
 Stats<-as.data.frame(cbind(Stats,Descriptions),row.names=FALSE)
 colnames(Stats)<-c("Stats","Descriptions")  
     
