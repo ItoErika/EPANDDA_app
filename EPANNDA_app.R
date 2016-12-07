@@ -172,6 +172,8 @@ print(paste("Writing Outputs",Sys.time()))
     
 # Write the Outputs
 setwd(paste(CurrentDirectory,"/output",sep=""))
+# Clear any old output files
+unlink("*")
 
 # Write the output
 saveRDS(MatchReferences, "MatchReferences.rds")
