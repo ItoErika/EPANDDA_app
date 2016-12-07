@@ -3,6 +3,7 @@
 PBDB Pub| DD Pub
 ---------- | ----------
 U. S. Geological Survey Bulletin | Bulletin
+United States Geological Survey Bulletin | Bulletin
 USGS Professional Paper | Professional Paper
 US Geological Survey Professional Paper | Professional Paper
 United States Geological Survey Professional Paper | Professional Paper
