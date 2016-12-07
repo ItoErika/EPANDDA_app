@@ -13,3 +13,4 @@ Geobios Mémoire Spécial | Geobios
 U.S.G.S. Open File Report | Open-File Report
 Comptes Rendus de l'Academie des Sciences, Serie II. Sciences de la Terre et des planetes | Comptes Rendus de l'Académie des Sciences - Series IIA - Earth and Planetary Science",
 Proceedings of the Geologist's Association | Proceedings of the Geologists' Association
+Geological Society America Bulletin | Geological Society of America Bulletin
