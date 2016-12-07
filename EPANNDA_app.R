@@ -85,6 +85,12 @@ PBDBRefs[,"pbdb_author"]<-as.character(PBDBRefs[,"pbdb_author"])
 PBDBRefs[,"pbdb_year"]<-as.numeric(as.character(PBDBRefs[,"pbdb_year"]))
 PBDBRefs[,"pbdb_title"]<-as.character(PBDBRefs[,"pbdb_title"])
 PBDBRefs[,"pbdb_pubtitle"]<-as.character(PBDBRefs[,"pbdb_pubtitle"])
+ 
+# Convert the title and pubtitle to all caps, because stringsim cannot distinguish between cases
+PBDBRefs[,"pbdb_title"]<-tolower(PBDBRefs[,"pbdb_title"])
+PBDBRefs[,"pbdb_pubtitle"]<-tolower(PBDBRefs[,"pubtitle"])
+DDRefs[,"gdd_title"]<-tolower(DDRefs[,"gdd_title"])
+DDRefs[,"gdd_pubtitle"]<-towlower(DDRefs[,"gdd_title"])
     
 # RECORD STATS 
 # Record the initial number of PBDB documents
