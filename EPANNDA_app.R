@@ -37,7 +37,7 @@ if (length(CommandArgument)==0) {
 print(paste("download PBDB refs",Sys.time()))
 
 # download all references from PBDB
-RefsURL<-"https://paleobiodb.org/data1.2/taxa/refs.csv?select=taxonomy&private&all_records"
+RefsURL<-"https://paleobiodb.org/data1.2/colls/refs.csv?all_records"
 GotURL<-getURL(RefsURL)
 PBDBRefs<-read.csv(text=GotURL,header=TRUE)
 
