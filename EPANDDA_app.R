@@ -73,6 +73,8 @@ DDRefs<-cbind(gdd_id,gdd_author,gdd_year,gdd_title,gdd_pubtitle, gdd_publisher)
 print(paste("usgs bulletin update",Sys.time()))   
 USGS_Bulletin<-which(DDRefs[,"gdd_pubtitle"]=="Bulletin"&DDRefs[,"gdd_publisher"]=="USGS")
 DDRefs[USGS_Bulletin,"gdd_pubtitle"]<-"usgs bulletin"
+# update and overwrite gdd_pubtitle
+gdd_pubtitle<-DDRefs[,"gdd_pubtitle"]
     
 # create identically formatted matrices for geodeepdive and pbdb references (overwrite DDRefs)
 DDRefs<-cbind(gdd_id,gdd_author,gdd_year,gdd_title,gdd_pubtitle, gdd_publisher)
@@ -117,7 +119,6 @@ PBDBRefs[,"pbdb_pubtitle"]<-gsub("u. s. geological survey","usgs", PBDBRefs[,"pb
 PBDBRefs[,"pbdb_pubtitle"]<-gsub("u.s.g.s.","usgs", PBDBRefs[,"pbdb_pubtitle"])       
 PBDBRefs[,"pbdb_pubtitle"]<-gsub("us geological survey","usgs", PBDBRefs[,"pbdb_pubtitle"])
 PBDBRefs[,"pbdb_pubtitle"]<-gsub("united states geological survey","usgs", PBDBRefs[,"pbdb_pubtitle"])
-PBDBRefs[,"pbdb_pubtitle"]<-gsub("geological survey","usgs", PBDBRefs[,"pbdb_pubtitle"]) 
     
 # For Geobios:
 geobios<-which(PBDBRefs[,"pbdb_pubtitle"]=="géobios"| 
