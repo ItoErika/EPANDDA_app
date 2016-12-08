@@ -29,7 +29,7 @@ if (require("plyr",warn.conflicts=FALSE)==FALSE) {
 # Start a cluster for multicore, 4 by default or higher if passed as command line argument
 CommandArgument<-commandArgs(TRUE)
 if (length(CommandArgument)==0) {
-    Cluster<-makeCluster(4)
+    Cluster<-makeCluster(3)
     } else {
     Cluster<-makeCluster(as.numeric(CommandArgument[1]))
     }
