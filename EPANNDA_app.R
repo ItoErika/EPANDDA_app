@@ -88,15 +88,38 @@ PBDBRefs[,"pbdb_pubtitle"]<-as.character(PBDBRefs[,"pbdb_pubtitle"])
  
 # Convert the title and pubtitle to all caps, because stringsim cannot distinguish between cases
 PBDBRefs[,"pbdb_title"]<-tolower(PBDBRefs[,"pbdb_title"])
-PBDBRefs[,"pbdb_pubtitle"]<-tolower(PBDBRefs[,"pubtitle"])
+PBDBRefs[,"pbdb_pubtitle"]<-tolower(PBDBRefs[,"pbdb_pubtitle"])
 DDRefs[,"gdd_title"]<-tolower(DDRefs[,"gdd_title"])
-DDRefs[,"gdd_pubtitle"]<-towlower(DDRefs[,"gdd_title"])
-    
+DDRefs[,"gdd_pubtitle"]<-tolower(DDRefs[,"gdd_pubtitle"])
+
 # RECORD STATS 
 # Record the initial number of PBDB documents
 PBDBDocs<-dim(PBDBRefs)[1]
 # Record the initial number of GeoDeepDive documents
-DDDocs<-dim(DDRefs)[1]
+DDDocs<-dim(DDRefs)[1]    
+    
+# Try to harmonize journal titles between PBDB and GDD
+print(paste("harmonize publication titles between pbdb and gdd",Sys.time()))
+
+# replace all versions of "United States Geological Survey" in PBDB with "usgs" 
+PBDBRefs[,"pbdb_pubtitle"]<-gsub("u.s. geological survey","usgs",PBDBRefs[,"pbdb_pubtitle"])
+PBDBRefs[,"pbdb_pubtitle"]<-gsub("u. s. geological survey","usgs", PBDBRefs[,"pbdb_pubtitle"])
+PBDBRefs[,"pbdb_pubtitle"]<-gsub("u.s.g.s.","usgs", PBDBRefs[,"pbdb_pubtitle"])       
+PBDBRefs[,"pbdb_pubtitle"]<-gsub("us geological survey","usgs", PBDBRefs[,"pbdb_pubtitle"])
+PBDBRefs[,"pbdb_pubtitle"]<-gsub("united states geological survey","usgs", PBDBRefs[,"pbdb_pubtitle"])
+PBDBRefs[,"pbdb_pubtitle"]<-gsub("geological survey","usgs", PBDBRefs[,"pbdb_pubtitle"]) 
+    
+# For Geobios:
+geobios<-which(PBDBRefs[,"pbdb_pubtitle"]=="géobios"| 
+PBDBRefs[,"pbdb_pubtitle"]=="geobios mémoire spécial")
+# Replace titles to match GeoDeepDive
+PBDBRefs[geobios,"pbdb_pubtitle"]<-"geobios"
+    
+# For Canadian Journal of Earth Sciences:
+canadian_journal<-which(PBDBRefs[,"pbdb_pubtitle"]=="canadian journal of earth science"|
+PBDBRefs[,"pbdb_pubtitle"]=="canadian journal earth science")
+# Replace titles to match GeoDeepDive
+PBDBRefs[canadian_journal,"pbdb_pubtitle"]<-"canadian journal of earth sciences"  
 
 ### Phase 2: A MATCHING FUNCTION IS BORN
 matchTitle<-function(x,y) {
