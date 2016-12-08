@@ -63,9 +63,19 @@ print(paste("make a vector of DD ref titles",Sys.time()))
 gdd_title<-parSapply(Cluster,DDRefs,function(x) x[["title"]])
 print(paste("make a column of DD journal names",Sys.time())) 
 gdd_pubtitle<-parSapply(Cluster,DDRefs,function(x) x[["journal"]])
-  
-# create identically formatted matrices for geodeepdive and pbdb references 
-DDRefs<-cbind(gdd_id,gdd_author,gdd_year,gdd_title,gdd_pubtitle)
+print(paste("make a column of DD publishers",Sys.time())) 
+gdd_publisher<-parSapply(Cluster,DDRefs,function(x) x[["publisher"]])
+
+# Bind DDRefs columns of interest
+DDRefs<-cbind(gdd_id,gdd_author,gdd_year,gdd_title,gdd_pubtitle, gdd_publisher)
+    
+# Update DDRefs[,"gdd_pubtitle"] to usgs bulletin where appropriate
+print(paste("usgs bulletin update",Sys.time()))   
+USGS_Bulletin<-which(DDRefs[,"gdd_pubtitle"]=="Bulletin"&DDRefs[,"gdd_publisher"]=="USGS")
+DDRefs[USGS_Bulletin,"gdd_pubtitle"]<-"usgs bulletin"
+    
+# create identically formatted matrices for geodeepdive and pbdb references (overwrite DDRefs)
+DDRefs<-cbind(gdd_id,gdd_author,gdd_year,gdd_title,gdd_pubtitle, gdd_publisher)
 PBDBRefs<-cbind(PBDBRefs[c("reference_no","author1last","pubyr","reftitle","pubtitle")])
 colnames(PBDBRefs)<-c("pbdb_no","pbdb_author","pbdb_year","pbdb_title","pbdb_pubtitle")
 
