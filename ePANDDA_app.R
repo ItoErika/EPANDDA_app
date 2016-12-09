@@ -169,7 +169,7 @@ matchAdditional<-function(InitialMatches) {
     # Pub year match
     Year<-InitialMatches["pbdb_year"]==InitialMatches["gdd_year"]
     #Pub year difference
-    YearDiff<-abs(InitialMatches["pbdb_year"]-InitialMatches["gdd_year"])
+    YearDiff<-abs(as.numeric(as.character(InitialMatches["pbdb_year"]))-as.numeric(as.character(InitialMatches["gdd_year"])))
     # Journal Similarity
     Journal<-stringsim(InitialMatches["pbdb_pubtitle"],InitialMatches["gdd_pubtitle"])
     # Author present
