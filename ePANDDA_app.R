@@ -49,7 +49,7 @@ print(paste("download DD refs",Sys.time()))
 # Move othe input folder
 setwd(paste(CurrentDirectory,"/input",sep=""))
 # Load in the input.bibjson file
-DDRefs<-fromJSON("input.bibjson")
+DDRefs<-fromJSON("input.bibjson") # if testing: "~/Documents/DeepDive/ePANDDA/EPANDDA_app-master/input/input.bibjson"
 
 print(paste("make DDRefs columns",Sys.time()))
 
