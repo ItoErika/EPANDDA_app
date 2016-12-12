@@ -168,14 +168,12 @@ print(paste("perform additional matches",Sys.time()))
 matchAdditional<-function(InitialMatches) {
     # Pub year match
     Year<-InitialMatches["pbdb_year"]==InitialMatches["gdd_year"]
-    #Pub year difference
-    YearDiff<-abs(as.numeric(as.character(InitialMatches["pbdb_year"]))-as.numeric(as.character(InitialMatches["gdd_year"])))
     # Journal Similarity
     Journal<-stringsim(InitialMatches["pbdb_pubtitle"],InitialMatches["gdd_pubtitle"])
     # Author present
     Author<-grepl(InitialMatches["pbdb_author"],InitialMatches["gdd_author"],perl=TRUE,ignore.case=TRUE)
     # Return output     
-    FinalOutput<-setNames(c(InitialMatches["pbdb_no"],InitialMatches["gdd_id"],InitialMatches["title_sim"],Author,Year,YearDiff,Journal),c("pbdb_no","gdd_id","title_sim","author_in","year_match","year_diff","pubtitle_sim"))
+    FinalOutput<-setNames(c(InitialMatches["pbdb_no"],InitialMatches["gdd_id"],InitialMatches["title_sim"],Author,Year,Journal),c("pbdb_no","gdd_id","title_sim","author_in","year_match","pubtitle_sim"))
     return(FinalOutput)
     }
 
