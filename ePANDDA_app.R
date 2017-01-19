@@ -202,7 +202,9 @@ Date<-as.character(Sys.time())
 # Bind stats
 Stats<-rbind(Date,PBDBDocs,DDDocs,RoundedTitleSim,Refs)
 Stats<-as.data.frame(cbind(Stats,Descriptions),row.names=FALSE)
-colnames(Stats)<-c("Stats","Descriptions")  
+colnames(Stats)<-c("Stats","Descriptions") 
+    
+print(Stats)
     
 # Status Update    
 print(paste("finish matches",Sys.time()))
