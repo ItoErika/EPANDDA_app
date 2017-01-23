@@ -51,6 +51,10 @@ setwd(paste(CurrentDirectory,"/input",sep=""))
 # Load in the input.bibjson file
 DDRefs<-fromJSON("input.bibjson") # if testing: "~/Documents/DeepDive/ePANDDA/EPANDDA_app-master/input/input.bibjson"
 
+############### DEBUG STEP ##
+print("debug stage 1")
+print(head(DDRefs))
+
 print(paste("make DDRefs columns",Sys.time()))
 
 print(paste("make a column of DD reference number",Sys.time()))
@@ -84,6 +88,11 @@ colnames(PBDBRefs)<-c("pbdb_no","pbdb_author","pbdb_year","pbdb_title","pbdb_pub
 # convert matrices to dataframes
 DDRefs<-as.data.frame(DDRefs)
 PBDBRefs<-as.data.frame(PBDBRefs)
+    
+############### DEBUG STEP ##
+print("debug stage 2")
+print(head(DDRefs))
+print(head(PBDBRefs))
 
 # Change data types of DDRefs to appropriate types
 DDRefs[,"gdd_id"]<-as.character(DDRefs[,"gdd_id"])
@@ -132,6 +141,11 @@ PBDBRefs[,"pbdb_pubtitle"]=="canadian journal earth science")
 # Replace titles to match GeoDeepDive
 PBDBRefs[canadian_journal,"pbdb_pubtitle"]<-"canadian journal of earth sciences"  
 
+############### DEBUG STEP ##
+print("debug stage 3")
+print(head(DDRefs))
+print(head(PBDBRefs))    
+    
 ### Phase 2: A MATCHING FUNCTION IS BORN
 matchTitle<-function(x,y) {
     Similarity<-stringsim(x,y)
@@ -161,6 +175,10 @@ InitialMatches<-merge(InitialMatches,PBDBRefs,by="pbdb_no",all.x=TRUE)
 # Status update
 print(paste("finish title matches",Sys.time()))
 
+############### DEBUG STEP ##
+print("debug stage 4")
+print(head(InitialMatches))    
+    
 ### Phase 3: Matching additional similarity information
 print(paste("perform additional matches",Sys.time()))
     
